@@ -1,28 +1,38 @@
 /*@refresh skip*/
 
-import type {Component, JSX, Owner} from "solid-js";
-import {children, createMemo, createRoot, getOwner, mergeProps, on, onCleanup, Show, untrack} from "solid-js";
-import {getRequestEvent, isServer, type RequestEvent} from "solid-js/web";
+import type { Component, JSX, Owner } from "solid-js";
 import {
-    createBranches,
-    createRouteContext,
-    createRouterContext,
-    getIntent,
-    getRouteMatches,
-    RouteContextObj,
-    RouterContextObj,
-    setInPreloadFn
+  children,
+  createMemo,
+  createRoot,
+  getOwner,
+  mergeProps,
+  on,
+  onCleanup,
+  Show,
+  untrack
+} from "solid-js";
+import { getRequestEvent, isServer, type RequestEvent } from "solid-js/web";
+import {
+  createBranches,
+  createRouteContext,
+  createRouterContext,
+  getIntent,
+  getRouteMatches,
+  RouteContextObj,
+  RouterContextObj,
+  setInPreloadFn
 } from "../routing.js";
 import type {
-    Branch,
-    MatchFilters,
-    RouteContext,
-    RouteDefinition,
-    RoutePreloadFunc,
-    RouterContext,
-    RouterIntegration,
-    RouteSectionComponent,
-    RouteSectionProps
+  Branch,
+  MatchFilters,
+  RouteContext,
+  RouteDefinition,
+  RoutePreloadFunc,
+  RouterContext,
+  RouterIntegration,
+  RouteSectionComponent,
+  RouteSectionProps
 } from "../types.js";
 
 export type BaseRouterProps = {
@@ -33,6 +43,8 @@ export type BaseRouterProps = {
   root?: Component<RouteSectionProps>;
   rootPreload?: RoutePreloadFunc;
   singleFlight?: boolean;
+  /** Wrap navigation updates with the browser View Transitions API when available. */
+  viewTransitions?: boolean;
   children?: JSX.Element | RouteDefinition | RouteDefinition[];
   transformUrl?: (url: string) => string;
   /** @deprecated use rootPreload */
@@ -51,11 +63,16 @@ export const createRouterComponent = (router: RouterIntegration) => (props: Base
     base,
     singleFlight: props.singleFlight,
     transformUrl: props.transformUrl,
+    viewTransitions: props.viewTransitions
   });
   router.create && router.create(routerState);
   return (
     <RouterContextObj.Provider value={routerState}>
-      <Root routerState={routerState} root={props.root} preload={props.rootPreload || props.rootLoad}>
+      <Root
+        routerState={routerState}
+        root={props.root}
+        preload={props.rootPreload || props.rootLoad}
+      >
         {(context = getOwner()!) && null}
         <Routes routerState={routerState} branches={branches()} />
       </Root>

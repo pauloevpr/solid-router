@@ -2,8 +2,8 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/npm/v/@solidjs/router.svg?style=for-the-badge&color=blue&logo=npm)](https://npmjs.com/package/@solidjs/router)
-[![Downloads](https://img.shields.io/npm/dm/@solidjs/router.svg?style=for-the-badge&color=green&logo=npm)](https://npmjs.com/package/@solidjs/router)
+[![Version](https://img.shields.io/npm/v/@pauloevpr/solid-router.svg?style=for-the-badge&color=blue&logo=npm)](https://npmjs.com/package/@pauloevpr/solid-router)
+[![Downloads](https://img.shields.io/npm/dm/@pauloevpr/solid-router.svg?style=for-the-badge&color=green&logo=npm)](https://npmjs.com/package/@pauloevpr/solid-router)
 [![Stars](https://img.shields.io/github/stars/solidjs/solid-router?style=for-the-badge&color=yellow&logo=github)](https://github.com/solidjs/solid-router)
 [![Discord](https://img.shields.io/discord/722131463138705510?label=join&style=for-the-badge&color=5865F2&logo=discord&logoColor=white)](https://discord.com/invite/solidjs)
 [![Reddit](https://img.shields.io/reddit/subreddit-subscribers/solidjs?label=join&style=for-the-badge&color=FF4500&logo=reddit&logoColor=white)](https://reddit.com/r/solidjs)
@@ -13,6 +13,8 @@
 **Solid Router** brings fine-grained reactivity to route navigation, enabling your single-page application to become multi-paged without full page reloads. Fully integrated into the SolidJS ecosystem, Solid Router provides declarative syntax with features like universal rendering and parallel data fetching for best performance.
 
 Explore the official [documentation](https://docs.solidjs.com/solid-router) for detailed guides and examples.
+
+This distribution is based on Solid Router 0.16.2 and adds opt-in browser-native view transitions with typed Solid directives for shared elements. It preserves the upstream API and falls back to normal router navigation when `document.startViewTransition` is unavailable.
 
 ## Core Features
 
@@ -27,6 +29,7 @@ Explore the official [documentation](https://docs.solidjs.com/solid-router) for 
 - **Preload Functions**: Parallel data fetching, following the render-as-you-fetch pattern
 - **Dynamic Route Parameters**: Flexible URL patterns with parameters, optional segments, and wildcards
 - **Data APIs with Caching**: Reactive data fetching with deduplication and revalidation
+- **View Transitions**: Coordinate router navigation and named shared elements with the browser View Transitions API
 
 ## Table of contents
 
@@ -34,6 +37,7 @@ Explore the official [documentation](https://docs.solidjs.com/solid-router) for 
   - [Set Up the Router](#set-up-the-router)
   - [Configure Your Routes](#configure-your-routes)
   - [Create Links to Your Routes](#create-links-to-your-routes)
+- [View Transitions](#view-transitions)
 - [Dynamic Routes](#dynamic-routes)
 - [Nested Routes](#nested-routes)
 - [Hash Mode Router](#hash-mode-router)
@@ -58,14 +62,16 @@ Explore the official [documentation](https://docs.solidjs.com/solid-router) for 
 
 ```bash
 # use preferred package manager
-npm add @solidjs/router
+npm add @pauloevpr/solid-router
 ```
 
-Install `@solidjs/router`, then start your application by rendering the router component
+Install `@pauloevpr/solid-router`, then start your application by rendering the router component
+
+Use this package for all router imports in an application rather than installing it beside `@solidjs/router`, because each distribution owns its own router context.
 
 ```jsx
 import { render } from "solid-js/web";
-import { Router } from "@solidjs/router";
+import { Router } from "@pauloevpr/solid-router";
 
 render(() => <Router />, document.getElementById("app"));
 ```
@@ -80,7 +86,7 @@ Solid Router allows you to configure your routes using JSX:
 
 ```jsx
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 import Home from "./pages/Home";
 import Users from "./pages/Users";
@@ -102,7 +108,7 @@ This will always be there and won't update on page change. It is the ideal place
 
 ```jsx
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 import Home from "./pages/Home";
 import Users from "./pages/Users";
@@ -131,7 +137,7 @@ We can create catch-all routes for pages not found at any nested level of the ro
 
 ```jsx
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 import Home from "./pages/Home";
 import Users from "./pages/Users";
@@ -163,7 +169,7 @@ This way, the `Users` and `Home` components will only be loaded if you're naviga
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 const Users = lazy(() => import("./pages/Users"));
 const Home = lazy(() => import("./pages/Home"));
@@ -193,7 +199,7 @@ Use an anchor tag that takes you to a route:
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 const Users = lazy(() => import("./pages/Users"));
 const Home = lazy(() => import("./pages/Home"));
@@ -220,6 +226,59 @@ render(
 );
 ```
 
+## View Transitions
+
+Enable native view transitions on the router:
+
+```tsx
+import { render } from "solid-js/web";
+import { Route, Router } from "@pauloevpr/solid-router";
+
+render(
+  () => (
+    <Router viewTransitions>
+      <Route path="/" component={Home} />
+      <Route path="/about" component={About} />
+    </Router>
+  ),
+  document.getElementById("app")!
+);
+```
+
+Match source and target elements with the provided directives:
+
+```tsx
+import {
+  viewTransitionSource,
+  viewTransitionTarget
+} from "@pauloevpr/solid-router";
+
+<a
+  href="/about"
+  use:viewTransitionSource={{
+    name: "about-card",
+    animation: "exponential-smooth",
+    include: ["about-title"]
+  }}
+>
+  <span
+    use:viewTransitionSource={{ name: "about-title", animation: "exponential-smooth" }}
+  >
+    About
+  </span>
+</a>;
+
+<main
+  use:viewTransitionTarget={{ name: "about-card", animation: "exponential-smooth" }}
+>
+  <h1 use:viewTransitionTarget={{ name: "about-title", animation: "exponential-smooth" }}>
+    About
+  </h1>
+</main>;
+```
+
+No stylesheet import is required. The animation styles are registered when a directive uses an animation.
+
 ## Dynamic Routes
 
 If you don't know the path ahead of time, you might want to treat part of the path as a flexible parameter that is passed on to the component.
@@ -227,7 +286,7 @@ If you don't know the path ahead of time, you might want to treat part of the pa
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
 
 const Users = lazy(() => import("./pages/Users"));
 const User = lazy(() => import("./pages/User"));
@@ -266,8 +325,8 @@ This allows for more complex routing descriptions than just checking the presenc
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
-import type { MatchFilters } from "@solidjs/router";
+import { Router, Route } from "@pauloevpr/solid-router";
+import type { MatchFilters } from "@pauloevpr/solid-router";
 
 const User = lazy(() => import("./pages/User"));
 
@@ -419,7 +478,7 @@ As its only argument, the preload function is passed an object that you can use 
 
 ```js
 import { lazy } from "solid-js";
-import { Route } from "@solidjs/router";
+import { Route } from "@pauloevpr/solid-router";
 
 const User = lazy(() => import("./pages/users/[id].js"));
 
@@ -442,7 +501,7 @@ A common pattern is to export the preload function and data wrappers that corres
 
 ```js
 import { lazy } from "solid-js";
-import { Route } from "@solidjs/router";
+import { Route } from "@pauloevpr/solid-router";
 import preloadUser from "./pages/users/[id].data.js";
 const User = lazy(() => import("/pages/users/[id].js"));
 
@@ -479,7 +538,7 @@ Using it with preload function might look like:
 
 ```js
 import { lazy } from "solid-js";
-import { Route } from "@solidjs/router";
+import { Route } from "@pauloevpr/solid-router";
 import { getUser } from ... // the query function
 
 const User = lazy(() => import("./pages/users/[id].js"));
@@ -549,7 +608,7 @@ const todos = createAsyncStore(() => getTodos());
 Actions are data mutations that can trigger invalidations and further routing. A list of prebuilt response helpers can be found below.
 
 ```jsx
-import { action, revalidate, redirect } from "@solidjs/router"
+import { action, revalidate, redirect } from "@pauloevpr/solid-router"
 
 // anywhere
 const myAction = action(async (data) => {
@@ -671,7 +730,7 @@ You don't have to use JSX to set up your routes; you can pass an array of route 
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router } from "@solidjs/router";
+import { Router } from "@pauloevpr/solid-router";
 
 const routes = [
   {
@@ -714,7 +773,7 @@ Also you can pass a single route definition object for a single route:
 ```jsx
 import { lazy } from "solid-js";
 import { render } from "solid-js/web";
-import { Router } from "@solidjs/router";
+import { Router } from "@pauloevpr/solid-router";
 
 const route = {
   path: "/",
@@ -731,7 +790,7 @@ render(() => <Router>{route}</Router>, document.getElementById("app"));
 By default, Solid Router uses `location.pathname` as route path. You can simply switch to hash mode through using `<HashRouter>`.
 
 ```jsx
-import { HashRouter } from "@solidjs/router";
+import { HashRouter } from "@pauloevpr/solid-router";
 
 <HashRouter />;
 ```
@@ -741,7 +800,7 @@ import { HashRouter } from "@solidjs/router";
 You can also use memory mode router for testing purpose.
 
 ```jsx
-import { MemoryRouter } from "@solidjs/router";
+import { MemoryRouter } from "@pauloevpr/solid-router";
 
 <MemoryRouter />;
 ```
@@ -752,7 +811,7 @@ For SSR you can use the static router directly or the browser Router defaults to
 
 ```jsx
 import { isServer } from "solid-js/web";
-import { Router } from "@solidjs/router";
+import { Router } from "@pauloevpr/solid-router";
 
 <Router url={isServer ? req.url : ""} />;
 ```
@@ -982,7 +1041,7 @@ That being said you can reproduce the old pattern largely by turning off preload
 
 ```js
 import { lazy } from "solid-js";
-import { Route } from "@solidjs/router";
+import { Route } from "@pauloevpr/solid-router";
 
 const User = lazy(() => import("./pages/users/[id].js"));
 

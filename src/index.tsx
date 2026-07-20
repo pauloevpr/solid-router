@@ -17,6 +17,14 @@ export {
 } from "./routing.js";
 export { mergeSearchString as _mergeSearchString } from "./utils.js";
 export * from "./data/index.js";
+export {
+  viewTransitionSource,
+  viewTransitionTarget,
+  type ViewTransitionAnimation,
+  type ViewTransitionOptions,
+  type ViewTransitionSourceOptions,
+  type ViewTransitionTargetOptions
+} from "./viewTransitions.js";
 export type {
   Location,
   LocationChange,

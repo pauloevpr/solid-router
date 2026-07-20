@@ -1,16 +1,24 @@
 {
-  "name": "@solidjs/router",
-  "description": "Universal router for SolidJS",
+  "name": "@pauloevpr/solid-router",
+  "description": "Solid Router with native View Transitions API support",
+  "keywords": [
+    "solid",
+    "router",
+    "view-transitions"
+  ],
   "author": "Ryan Carniato",
   "contributors": [
     "Ryan Turnquist"
   ],
   "license": "MIT",
-  "version": "0.16.2",
-  "homepage": "https://github.com/solidjs/solid-router#readme",
+  "version": "0.16.2-vt.1",
+  "homepage": "https://github.com/pauloevpr/solid-router#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/solidjs/solid-router"
+    "url": "https://github.com/pauloevpr/solid-router"
+  },
+  "bugs": {
+    "url": "https://github.com/pauloevpr/solid-router/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -30,7 +38,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "rm -rf dist && tsc && rollup -c",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm test && npm run build",
     "test": "vitest run && npm run test:types",
     "test:watch": "vitest",
     "test:types": "tsc --project tsconfig.test.json",

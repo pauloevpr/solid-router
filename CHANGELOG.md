@@ -1,4 +1,9 @@
-# @solidjs/router
+# @pauloevpr/solid-router
+
+## 0.16.2-vt.1
+
+- Add optional native View Transitions API integration to router navigation.
+- Add typed source and target directives for shared-element transitions.
 
 ## 0.16.2
 
